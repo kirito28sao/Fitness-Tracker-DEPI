@@ -1,0 +1,9 @@
+android {
+    namespace "com.example.health"
+    compileSdkVersion 33
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 33
+    }
+} 
