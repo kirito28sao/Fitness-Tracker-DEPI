@@ -5,10 +5,16 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// Add this configuration to disable state tracking
+tasks.named("compileFlutterBuildDebug") {
+    notCompatibleWithConfigurationCache("Flutter build tasks are not compatible with configuration cache")
+    doNotTrackState("Flutter build tasks should not track state")
+}
+
 android {
     namespace = "com.example.fitness_tracker"
-    compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    compileSdk = 35
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

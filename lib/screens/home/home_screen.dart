@@ -4,6 +4,8 @@ import '../../providers/auth_provider.dart';
 import '../../providers/health_provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../screens/profile/profile_screen.dart';
+import '../exercises/activites.dart';
+import '../goals/goals_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -55,7 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
         },
         items: const [
           BottomNavigationBarItem(
-            backgroundColor: Colors.deepPurple,
+            backgroundColor: Colors.deepOrange,
             icon: Icon(
               Icons.home,
               color: Colors.white,
@@ -63,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            backgroundColor: Colors.deepPurple,
+            backgroundColor: Colors.deepOrange,
             icon: Icon(
               Icons.fitness_center,
               color: Colors.white,
@@ -71,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Activities',
           ),
           BottomNavigationBarItem(
-            backgroundColor: Colors.deepPurple,
+            backgroundColor: Colors.deepOrange,
             icon: Icon(
               Icons.flag,
               color: Colors.white,
@@ -79,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Goals',
           ),
           BottomNavigationBarItem(
-            backgroundColor: Colors.deepPurple,
+            backgroundColor: Colors.deepOrange,
             icon: Icon(
               Icons.person,
               color: Colors.white,
@@ -96,11 +98,11 @@ class _HomeScreenState extends State<HomeScreen> {
       case 0:
         return _buildHomeTab();
       case 1:
-        return _buildActivitiesTab();
+        return const ExerciseListScreen();
       case 2:
-        return _buildGoalsTab();
+        return const GoalsScreen();
       case 3:
-        return _buildProfileTab();
+        return const ProfileScreen();
       default:
         return _buildHomeTab();
     }
@@ -211,7 +213,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 icon: Icons.local_fire_department,
                 title: 'Calories',
                 value:
-                    '${healthProvider.getTodayCalories().toStringAsFixed(0)}',
+                    healthProvider.getTodayCalories().toStringAsFixed(0),
                 color: Colors.orange,
               ),
             ),
@@ -329,36 +331,20 @@ class _HomeScreenState extends State<HomeScreen> {
           physics: const NeverScrollableScrollPhysics(),
           itemCount: 3,
           itemBuilder: (context, index) {
-            return Card(
-              margin: const EdgeInsets.only(bottom: 8),
+            return const Card(
+              margin: EdgeInsets.only(bottom: 8),
               child: ListTile(
-                leading: const CircleAvatar(
+                leading: CircleAvatar(
                   child: Icon(Icons.directions_run),
                 ),
-                title: const Text('Morning Run'),
-                subtitle: const Text('30 minutes • 3.5 km'),
-                trailing: const Text('320 cal'),
+                title: Text('Morning Run'),
+                subtitle: Text('30 minutes • 3.5 km'),
+                trailing: Text('320 cal'),
               ),
             );
           },
         ),
       ],
     );
-  }
-
-  Widget _buildActivitiesTab() {
-    return const Center(
-      child: Text('Activities Tab'),
-    );
-  }
-
-  Widget _buildGoalsTab() {
-    return const Center(
-      child: Text('Goals Tab'),
-    );
-  }
-
-  Widget _buildProfileTab() {
-    return const ProfileScreen();
   }
 }

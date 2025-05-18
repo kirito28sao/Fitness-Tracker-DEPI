@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../providers/user_profile_provider.dart';
+import 'package:http/http.dart' as http;
+import 'dart:math';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -127,16 +129,74 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   GestureDetector(
                     onTap: _pickImage,
-                    child: CircleAvatar(
-                      radius: 50,
-                      backgroundImage: profile?.profileImageUrl != null
-                          ? NetworkImage(profile!.profileImageUrl!)
-                          : null,
-                      child: profile?.profileImageUrl == null
-                          ? const Icon(Icons.person, size: 50)
-                          : null,
+                    child: Stack(
+                      children: [
+                        CircleAvatar(
+                          radius: 50,
+                          backgroundColor: Colors.grey[200],
+                          child: profile?.profileImageUrl != null
+                              ? ClipOval(
+                                  child: CachedNetworkImage(
+                                    imageUrl: profile!.profileImageUrl!,
+                                    width: 100,
+                                    height: 100,
+                                    fit: BoxFit.cover,
+                                    memCacheWidth: 200,
+                                    memCacheHeight: 200,
+                                    placeholder: (context, url) => const Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                    errorWidget: (context, url, error) {
+                                      debugPrint('Error loading image: $error');
+                                      debugPrint('Failed URL: $url');
+
+                                      // Try to load the image directly
+                                      http.get(Uri.parse(url)).then((response) {
+                                        debugPrint(
+                                            'Direct image load status: ${response.statusCode}');
+                                        if (response.statusCode == 200) {
+                                          debugPrint(
+                                              'Image loaded successfully');
+                                          debugPrint(
+                                              'Content-Type: ${response.headers['content-type']}');
+                                        } else {
+                                          debugPrint(
+                                              'Failed to load image: ${response.body}');
+                                        }
+                                      }).catchError((e) {
+                                        debugPrint(
+                                            'Direct image load error: $e');
+                                      });
+
+                                      return const Icon(
+                                        Icons.person,
+                                        size: 50,
+                                      );
+                                    },
+                                  ),
+                                )
+                              : const Icon(Icons.person, size: 50),
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).primaryColor,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.camera_alt,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
+                  
                   const SizedBox(height: 24),
                   TextFormField(
                     controller: _fullNameController,
@@ -187,7 +247,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     items: const [
                       DropdownMenuItem(value: 'male', child: Text('Male')),
                       DropdownMenuItem(value: 'female', child: Text('Female')),
-                      DropdownMenuItem(value: 'other', child: Text('Other')),
                     ],
                     onChanged: (value) {
                       setState(() {

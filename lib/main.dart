@@ -2,19 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:yandex_mobileads/mobile_ads.dart';
 import 'dart:developer' as developer;
-
+import 'package:yandex_mobileads/mobile_ads.dart';
 // Import screens and providers
 import 'screens/auth/login_screen.dart';
-import 'screens/auth/register_screen.dart';
-import 'screens/home/home_screen.dart';
+import 'screens/home/home_screen.dart' show HomeScreen;
 import 'providers/auth_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/health_provider.dart';
 import 'providers/user_profile_provider.dart';
 import 'utils/theme.dart';
+import 'providers/goals_provider.dart';
 
 void main() async {
   try {
@@ -84,6 +82,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => HealthProvider()),
         ChangeNotifierProvider(create: (_) => UserProfileProvider()),
+        ChangeNotifierProvider(create: (_) => GoalsProvider()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
@@ -116,9 +115,9 @@ class AuthWrapper extends StatelessWidget {
 
         if (authProvider.user != null) {
           return const HomeScreen();
+        } else {
+          return const LoginScreen();
         }
-
-        return const LoginScreen();
       },
     );
   }

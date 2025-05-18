@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:io';
 
+
 class UserProfile {
   final String id;
   String? fullName;
@@ -97,6 +98,9 @@ class UserProfileProvider with ChangeNotifier {
         throw Exception('No user logged in');
       }
 
+      debugPrint('Updating profile in database');
+      debugPrint('Profile data: ${updatedProfile.toJson()}');
+
       await Supabase.instance.client
           .from('users')
           .update(updatedProfile.toJson())
@@ -104,8 +108,10 @@ class UserProfileProvider with ChangeNotifier {
 
       _profile = updatedProfile;
       _error = null;
+      debugPrint('Profile updated in database successfully');
     } catch (e) {
       _error = e.toString();
+      debugPrint('Error updating profile: $e');
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -123,25 +129,59 @@ class UserProfileProvider with ChangeNotifier {
         throw Exception('No user logged in');
       }
 
+      debugPrint('Starting image upload for user: ${user.id}');
+      debugPrint('Image path: $imagePath');
+
       final file = File(imagePath);
       final fileExt = imagePath.split('.').last;
       final fileName =
           '${user.id}_${DateTime.now().millisecondsSinceEpoch}.$fileExt';
-      final filePath = 'profile_images/$fileName';
+      final filePath = fileName; // Simplified path
 
-      await Supabase.instance.client.storage
-          .from('users')
-          .upload(filePath, file);
+      debugPrint('Uploading to path: $filePath');
 
-      final imageUrl =
-          Supabase.instance.client.storage.from('users').getPublicUrl(filePath);
+      try {
+        // Upload the file
+        final uploadResponse = await Supabase.instance.client.storage
+            .from('users')
+            .upload(filePath, file);
 
-      if (_profile != null) {
-        _profile!.profileImageUrl = imageUrl;
-        await updateProfile(_profile!);
+        debugPrint('Upload response: $uploadResponse');
+
+        if (uploadResponse == null) {
+          throw Exception('Failed to upload image');
+        }
+
+        // Get the public URL
+        final imageUrl = Supabase.instance.client.storage
+            .from('users')
+            .getPublicUrl(filePath);
+
+        debugPrint('Generated image URL: $imageUrl');
+
+        // Update the profile with the new image URL
+        if (_profile != null) {
+          debugPrint('Updating profile with new image URL');
+          _profile!.profileImageUrl = imageUrl;
+          await updateProfile(_profile!);
+          debugPrint('Profile updated successfully');
+        } else {
+          debugPrint('Profile is null, cannot update');
+        }
+      } catch (e) {
+        debugPrint('Error in upload process: $e');
+        if (e is StorageException) {
+          debugPrint('Storage error details: ${e.message}');
+          debugPrint('Storage error status code: ${e.statusCode}');
+        }
+        rethrow;
       }
     } catch (e) {
       _error = e.toString();
+      debugPrint('Error uploading profile image: $e');
+      if (e is StorageException) {
+        debugPrint('Storage error details: ${e.message}');
+      }
     } finally {
       _isLoading = false;
       notifyListeners();
